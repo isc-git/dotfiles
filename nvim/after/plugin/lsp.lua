@@ -41,6 +41,16 @@ require('mason-lspconfig').setup({
                         checkOnSave = {
                             command = "clippy",
                         },
+                        --workspace = {
+                        --    symbol = {
+                        --        search = {
+                        --            limit = 1024, -- Example of increasing the limit
+                        --        },
+                        --    },
+                        --},
+                        --cargo = {
+                        --    targetDir = "./data/nvim-target",
+                        --},
                     }
                 }
             })
