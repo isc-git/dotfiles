@@ -26,3 +26,12 @@ vim.opt.scrolloff = 8
 vim.opt.termguicolors = true
 vim.opt.signcolumn = "auto"
 vim.opt.colorcolumn = "88"
+
+-- disable banner
+vim.g.netrw_banner = 0
+-- set to tree-like
+vim.g.netrw_liststyle = 3
+-- return to last edited file
+vim.g.netrw_altfile = 1
+-- human readable file-size
+vim.g.netrw_sizestyle = "H"
