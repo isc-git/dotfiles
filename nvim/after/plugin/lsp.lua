@@ -1,83 +1,88 @@
-local lsp_zero = require('lsp-zero')
+local on_attach = function(client, bufnr)
+    -- Format on save if supported
+    if client.supports_method("textDocument/formatting") then
+        vim.api.nvim_create_autocmd("BufWritePre", {
+            group = vim.api.nvim_create_augroup("LspFormatOnSave", { clear = true }),
+            buffer = bufnr,
+            callback = function()
+                vim.lsp.buf.format({ async = false })
+            end,
+        })
+    end
 
-lsp_zero.on_attach(function(client, bufnr)
-    -- K: Displays hover information about the symbol under the cursor in a floating window. See :help vim.lsp.buf.hover().
-    -- gd: Jumps to the definition of the symbol under the cursor. See :help vim.lsp.buf.definition().
-    -- gD: Jumps to the declaration of the symbol under the cursor. Some servers don't implement this feature. See :help vim.lsp.buf.declaration().
-    -- gi: Lists all the implementations for the symbol under the cursor in the quickfix window. See :help vim.lsp.buf.implementation().
-    -- go: Jumps to the definition of the type of the symbol under the cursor. See :help vim.lsp.buf.type_definition().
-    -- gr: Lists all the references to the symbol under the cursor in the quickfix window. See :help vim.lsp.buf.references().
-    -- gs: Displays signature information about the symbol under the cursor in a floating window. See :help vim.lsp.buf.signature_help(). If a mapping already exists for this key this function is not bound.
-    -- <F2>: Renames all references to the symbol under the cursor. See :help vim.lsp.buf.rename().
-    -- <F3>: Format code in current buffer. See :help vim.lsp.buf.format().
-    -- <F4>: Selects a code action available at the current cursor position. See :help vim.lsp.buf.code_action().
-    -- gl: Show diagnostics in a floating window. See :help vim.diagnostic.open_float().
-    -- [d: Move to the previous diagnostic in the current buffer. See :help vim.diagnostic.goto_prev().
-    -- ]d: Move to the next diagnostic. See :help vim.diagnostic.goto_next().
-    lsp_zero.default_keymaps({ buffer = bufnr })
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = bufnr, desc = "Go to Definition" })
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, { buffer = bufnr, desc = "Go to Declaration" })
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, { buffer = bufnr, desc = "Go to Implementation" })
+    vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, { buffer = bufnr, desc = "Type Definition" })
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, { buffer = bufnr, desc = "References" })
 
-    -- may break with multiple language servers on a file
-    lsp_zero.buffer_autoformat()
-end)
+    -- help
+    vim.keymap.set('n', 'gR', vim.lsp.buf.rename, { buffer = bufnr, desc = "Rename" })
+    vim.keymap.set('n', 'K', function()
+        vim.lsp.buf.hover({ border = "rounded" })
+    end, { buffer = bufnr, desc = "Hover" })
+    vim.keymap.set('n', 'gs', function()
+        vim.lsp.buf.signature_help({ border = "rounded"})
+    end, { buffer = bufnr, desc = "Signature Help" })
+
+    -- diagnostics navigation
+    vim.keymap.set('n', 'gl', vim.diagnostic.open_float, { buffer = bufnr, desc = "Line Diagnostics" })
+    vim.keymap.set('n', '[d', function()
+        vim.diagnostic.jump({ count = -1 })
+    end, { buffer = bufnr, desc = "Prev Diagnostic" })
+    vim.keymap.set('n', ']d', function()
+        vim.diagnostic.jump({ count = 1 })
+    end, { buffer = bufnr, desc = "Next Diagnostic" })
+end
+
 
 -- mason to automatically set up language servers
 require('mason').setup({})
 require('mason-lspconfig').setup({
     ensure_installed = { "lua_ls", "rust_analyzer" },
     handlers = {
-        lsp_zero.default_setup,
-        --- the name of the handler must be the same
-        --- as the name of the language server
+        function(server_name)
+            require('lspconfig')[server_name].setup({
+                on_attach = on_attach,
+                capabilities = require('cmp_nvim_lsp').default_capabilities(),
+            })
+        end,
         rust_analyzer = function()
-            --- in this function you can setup
-            --- the language server however you want.
-            --- in this example we just use lspconfig
-
             require('lspconfig').rust_analyzer.setup({
-                -- in here you can add your own
-                -- custom configuration
+                on_attach = on_attach,
+                capabilities = require('cmp_nvim_lsp').default_capabilities(),
                 settings = {
-                    ['rust-analyzer'] = {
+                    ["rust-analyzer"] = {
                         checkOnSave = {
                             command = "clippy",
                         },
-                        --workspace = {
-                        --    symbol = {
-                        --        search = {
-                        --            limit = 1024, -- Example of increasing the limit
-                        --        },
-                        --    },
-                        --},
-                        --cargo = {
-                        --    targetDir = "./data/nvim-target",
-                        --},
-                    }
-                }
+                    },
+                },
             })
         end,
     },
 })
 
--- some more bindings
 local cmp = require('cmp')
-local cmp_action = require('lsp-zero').cmp_action()
+local luasnip = require('luasnip')
 
 cmp.setup({
+    snippet = {
+        expand = function(args)
+            luasnip.lsp_expand(args.body)
+        end,
+    },
     mapping = cmp.mapping.preset.insert({
-        -- Navigate between snippet placeholder
-        ['<C-f>'] = cmp_action.luasnip_jump_forward(),
-        ['<C-b>'] = cmp_action.luasnip_jump_backward(),
-
-        -- Scroll up and down in the completion documentation
+        ['<C-f>'] = function() luasnip.jump(1) end,
+        ['<C-b>'] = function() luasnip.jump(-1) end,
         ['<C-u>'] = cmp.mapping.scroll_docs(-4),
         ['<C-d>'] = cmp.mapping.scroll_docs(4),
-    })
-})
-
--- PATCH: https://www.reddit.com/r/neovim/comments/15dfx4g/help_lsp_diagnostics_are_not_being_displayed/
-vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = { "*" },
-    callback = function()
-        vim.diagnostic.enable(0)
-    end
+        --['<CR>'] = cmp.mapping.confirm({ select = true }),
+        --['<Tab>'] = cmp.mapping.select_next_item(),
+        --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+    }),
+    sources = {
+        { name = 'nvim_lsp' },
+        { name = 'luasnip' },
+    },
 })

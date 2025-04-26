@@ -47,33 +47,18 @@ end, { desc = "LSP workspace symbols" })
 
 vim.keymap.set('n', '<leader>lf', function()
     builtin.lsp_document_symbols({
-        symbols = { "function" },
+        symbols = { "function", "method" },
     })
 end, {})
---vim.keymap.set('n', '<leader>lwf', function()
---    builtin.lsp_workspace_symbols({
---        symbols = { "function" },
---    })
---end, {})
 
 vim.keymap.set('n', '<leader>lss', function()
     builtin.lsp_document_symbols({
         symbols = { "struct" },
     })
 end, {})
---vim.keymap.set('n', '<leader>lwss', function()
---    builtin.lsp_workspace_symbols({
---        symbols = { "struct" },
---    })
---end, {})
 
 vim.keymap.set('n', '<leader>le', function()
     builtin.lsp_document_symbols({
         symbols = { "enum" },
     })
 end, {})
---vim.keymap.set('n', '<leader>lwe', function()
---    builtin.lsp_workspace_symbols({
---        symbols = { "enum" },
---    })
---end, {})
