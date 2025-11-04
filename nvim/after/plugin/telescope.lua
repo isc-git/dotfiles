@@ -1,64 +1,30 @@
-require("telescope").setup {
-    extensions = {
-        ["ui-select"] = {
-        }
-    }
-}
-
 require("telescope").load_extension("ui-select")
+local builtin = require("telescope.builtin")
 
-local builtin = require('telescope.builtin')
+-- buffer
+vim.keymap.set("n", "<leader>bc", builtin.buffers, { desc = "Telescope buffers" })
 
--- navigation
-vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fc', builtin.grep_string, {})
-vim.keymap.set('n', '<leader>fo', builtin.oldfiles, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fm', builtin.man_pages, {})
+-- file
+vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
+vim.keymap.set("n", "<leader>fg", builtin.git_files, { desc = "Telescope git ls-files" })
+vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Telescope old files" })
+
+-- grep
+vim.keymap.set("n", "<leader>gf", builtin.live_grep, { desc = "Telescope live grep" })
+vim.keymap.set("n", "<leader>gs", builtin.grep_string, { desc = "Telescope live grep" })
+vim.keymap.set("n", "<leader>gb", builtin.current_buffer_fuzzy_find, { desc = "Telescope live fuzzy search in buffer" })
+
+-- help
+vim.keymap.set("n", "<leader>hpv", builtin.help_tags, { desc = "Telescope help tags" })
+vim.keymap.set("n", "<leader>hpm", builtin.man_pages, { desc = "Telescope man pages" })
+vim.keymap.set("n", "<leader>hps", builtin.spell_suggest, { desc = "Telescope spelling suggestions" })
 
 -- history
-vim.keymap.set('n', '<leader>hc', builtin.command_history, {})
-vim.keymap.set('n', '<leader>hs', builtin.search_history, {})
+vim.keymap.set("n", "<leader>hc", builtin.command_history, { desc = "Telescope lists command history" })
+vim.keymap.set("n", "<leader>hs", builtin.search_history, { desc = "Telescope search history" })
 
--- nvim random
-vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
-vim.keymap.set('n', '<leader>vc', builtin.colorscheme, {})
-vim.keymap.set('n', '<leader>vm', builtin.marks, {})
-vim.keymap.set('n', '<leader>vs', builtin.spell_suggest, {})
-vim.keymap.set('n', '<leader>vk', builtin.keymaps, {})
-
--- lsp
-vim.keymap.set('n', '<leader>lr', builtin.lsp_references, {})
-vim.keymap.set('n', '<leader>ld', builtin.diagnostics, {})
-
-vim.keymap.set('n', '<leader>li', builtin.lsp_implementations, {})
-vim.keymap.set('n', '<leader>lg', builtin.lsp_definitions, {})
-vim.keymap.set('n', '<leader>lG', builtin.lsp_type_definitions, {})
-
-vim.keymap.set('n', '<leader>ls', builtin.lsp_document_symbols, {})
-vim.keymap.set('n', '<leader>lt', builtin.treesitter, {})
---vim.keymap.set('n', '<leader>lw', builtin.lsp_dynamic_workspace_symbols, {})
-vim.keymap.set("n", "<leader>lw", function()
-    vim.ui.input({ prompt = "symbols: " }, function(query)
-        builtin.lsp_workspace_symbols({ query = query })
-    end)
-end, { desc = "LSP workspace symbols" })
-
-vim.keymap.set('n', '<leader>lf', function()
-    builtin.lsp_document_symbols({
-        symbols = { "function", "method" },
-    })
-end, {})
-
-vim.keymap.set('n', '<leader>lss', function()
-    builtin.lsp_document_symbols({
-        symbols = { "struct" },
-    })
-end, {})
-
-vim.keymap.set('n', '<leader>le', function()
-    builtin.lsp_document_symbols({
-        symbols = { "enum" },
-    })
-end, {})
+-- vim settings
+vim.keymap.set("n", "<leader>vk", builtin.keymaps, { desc = "Telescope lists normal mode keymappings" })
+vim.keymap.set("n", "<leader>vc", builtin.colorscheme, { desc = "Telescope color schemes" })
+vim.keymap.set("n", "<leader>vo", builtin.vim_options, { desc = "Telescope lists vim options" })
+vim.keymap.set("n", "<leader>vr", builtin.registers, { desc = "Telescope lists vim registers" })
